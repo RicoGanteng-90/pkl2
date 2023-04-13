@@ -1,89 +1,28 @@
-<!DOCTYPE html>
 <html>
-
-<head>
-    <title>Soal Test Geolocation</title>
-    <meta name="viewport" content="initial-scale=1.0">
-    <meta charset="utf-8">
-    <style>
-        #map {
-            height: 100%;
-        }
-
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
-</head>
-
-<body>
-    <input id="latlng" type="text" value="40.714224,-73.961452">
-    <input id="submit" type="button" value="Geocode">
+  <head>
+    <title>Reverse Geocoding</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src="js.js"></script>
+    <link rel="stylesheet" href="css.css">
+    <!-- jsFiddle will insert css and js -->
+  </head>
+  <body>
+    <div id="floating-panel">
+      <input id="latlng" type="text" value="40.714224,-73.961452" />
+      <input id="submit" type="button" value="Reverse Geocode" />
+    </div>
     <div id="map"></div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBNVPWf-3GfyXxiJuhRjDYHBag04kR2so&callback=initMap"
-        async defer></script>
-
-    <script>
-        let cachedResults = {}; // variabel untuk menyimpan hasil geocoding sebelumnya
-
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 8,
-                center: { lat: 40.731, lng: -73.997 },
-            });
-            const geocoder = new google.maps.Geocoder();
-            const infowindow = new google.maps.InfoWindow();
-
-            document.getElementById("submit").addEventListener("click", () => {
-                geocodeLatLng(geocoder, map, infowindow);
-            });
-        }
-
-        function geocodeLatLng(geocoder, map, infowindow) {
-            const input = document.getElementById("latlng").value;
-            const latlngStr = input.split(",", 2);
-            const latlng = {
-                lat: parseFloat(latlngStr[0]),
-                lng: parseFloat(latlngStr[1]),
-            };
-
-            // cek apakah hasil geocoding sudah tersimpan di cache
-            if (cachedResults[input]) {
-                showResult(cachedResults[input], map, infowindow, latlng);
-            } else {
-                geocoder
-                    .geocode({ location: latlng })
-                    .then((response) => {
-                        if (response.results[0]) {
-                            const result = response.results[0];
-                            cachedResults[input] = result; // simpan hasil geocoding di cache
-                            showResult(result, map, infowindow, latlng);
-                        } else {
-                            window.alert("No results found");
-                        }
-                    })
-                    .catch((e) => window.alert("Geocoder failed due to: " + e));
-            }
-        }
-
-        function showResult(result, map, infowindow, latlng) {
-            map.setZoom(11);
-
-            const marker = new google.maps.Marker({
-                position: latlng,
-                map: map,
-            });
-
-            infowindow.setContent(result.formatted_address);
-            infowindow.open(map, marker);
-        }
-
-        window.initMap = initMap;
-    </script>
-</body>
-
+    <!-- 
+      The `defer` attribute causes the callback to execute after the full HTML
+      document has been parsed. For non-blocking uses, avoiding race conditions,
+      and consistent behavior across browsers, consider loading using Promises.
+      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+      for more information.
+      -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"
+      defer
+    ></script>
+  </body>
 </html>
