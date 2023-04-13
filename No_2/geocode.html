@@ -1,29 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reverse Geocode</title>
-    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
+    <title>Soal Test Geolocation</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        #map {
+            height: 100%;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </head>
+
 <body>
+    <input id="latlng" type="text" value="40.714224,-73.961452">
+    <input id="submit" type="button" value="Geocode">
+    <div id="map"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDBNVPWf-3GfyXxiJuhRjDYHBag04kR2so&callback=initMap"
+        async defer></script>
+
     <script>
-    function getReverseGeocodingData(lat, lng) {
-        var latlng = new google.maps.LatLng(lat, lng);
-        // This is making the Geocode request
-        var geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ 'latLng': latlng }, function (results, status) {
-            if (status !== google.maps.GeocoderStatus.OK) {
-                alert(status);
+        let cachedResults = {}; // variabel untuk menyimpan hasil geocoding sebelumnya
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 8,
+                center: { lat: 40.731, lng: -73.997 },
+            });
+            const geocoder = new google.maps.Geocoder();
+            const infowindow = new google.maps.InfoWindow();
+
+            document.getElementById("submit").addEventListener("click", () => {
+                geocodeLatLng(geocoder, map, infowindow);
+            });
+        }
+
+        function geocodeLatLng(geocoder, map, infowindow) {
+            const input = document.getElementById("latlng").value;
+            const latlngStr = input.split(",", 2);
+            const latlng = {
+                lat: parseFloat(latlngStr[0]),
+                lng: parseFloat(latlngStr[1]),
+            };
+
+            // cek apakah hasil geocoding sudah tersimpan di cache
+            if (cachedResults[input]) {
+                showResult(cachedResults[input], map, infowindow, latlng);
+            } else {
+                geocoder
+                    .geocode({ location: latlng })
+                    .then((response) => {
+                        if (response.results[0]) {
+                            const result = response.results[0];
+                            cachedResults[input] = result; // simpan hasil geocoding di cache
+                            showResult(result, map, infowindow, latlng);
+                        } else {
+                            window.alert("No results found");
+                        }
+                    })
+                    .catch((e) => window.alert("Geocoder failed due to: " + e));
             }
-            // This is checking to see if the Geoeode Status is OK before proceeding
-            if (status == google.maps.GeocoderStatus.OK) {
-                console.log(results);
-                var address = (results[0].formatted_address);
-            }
-        });
-    }
+        }
+
+        function showResult(result, map, infowindow, latlng) {
+            map.setZoom(11);
+
+            const marker = new google.maps.Marker({
+                position: latlng,
+                map: map,
+            });
+
+            infowindow.setContent(result.formatted_address);
+            infowindow.open(map, marker);
+        }
+
+        window.initMap = initMap;
     </script>
 </body>
+
 </html>
